@@ -27,10 +27,10 @@ t = threading.Thread(target=animate)
 t.start()
 
 """Uncomment below to download new data"""
-# read_petrol_price()
-# usd_pln()
-# read_petrol_price_country()
-# avg_salary_csv()
+read_petrol_price()
+usd_pln()
+read_petrol_price_country()
+avg_salary_csv()
 
 draw_petrol_oil_plot()
 draw_petrol_tax_pie()
