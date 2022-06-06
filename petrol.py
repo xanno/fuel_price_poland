@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 import numpy as np
 
 """
@@ -13,12 +12,14 @@ diesel price: https://www.lotos.pl/145/type,oil_eurodiesel/dla_biznesu/hurtowe_c
 col_names_petrol = ['unnamed', 'date', 'price95', 'excise95', 'Fuelsurcharge95']
 petrol_df = pd.read_csv('data/petrol95.csv', parse_dates=['date'], names=col_names_petrol, index_col='date',
                         usecols=col_names_petrol[1:], decimal=',', header=0, thousands=' ')
+
 col_names_diesel = ['unnamed', 'date', 'price_diesel', 'excise_diesel', 'Fuelsurcharge_diesel']
 diesel_df = pd.read_csv('data/euro_diesel.csv', parse_dates=['date'], names=col_names_diesel, index_col='date',
                         usecols=col_names_diesel[1:], decimal=',', header=0, thousands=' ')
 
 col_names_oil = ["date", "last", "open", "maximum", "minimum", "vol", "change"]
-oil_df = pd.read_csv('data/oil.csv', names=col_names_oil, usecols=['date', 'open'], index_col='date', parse_dates=['date'],
+oil_df = pd.read_csv('data/oil.csv', names=col_names_oil, usecols=['date', 'open'], index_col='date',
+                     parse_dates=['date'],
                      decimal=',', thousands=' ', header=0, dayfirst=True)
 
 usd_df = pd.read_csv('data/exchange.csv', parse_dates=['date'], index_col='date')
@@ -39,6 +40,32 @@ country_fuel_df.set_index('Kraj', inplace=True)
 country_fuel_df['PB95 PLN'] = pd.to_numeric(country_fuel_df['PB95 PLN'])
 country_fuel_df['PB95 PLN'] = country_fuel_df['PB95 PLN'] / 1000
 country_fuel_df.sort_values('PB95 PLN', inplace=True, ascending=False)
+
+avg_salary_df = pd.read_csv('data/avg_salary.csv')
+avg_salary_df.drop(['Unnamed: 0', 'Skrót', 'Nr.'], axis=1, inplace=True)
+avg_salary_df.set_index('Kraj UE', inplace=True)
+avg_salary_df['cena benzyny'] = country_fuel_df
+
+avg_salary_df = avg_salary_df.replace(regex=[' zł', "'"], value='')
+avg_salary_df['Miesięczne wynagrodzenie brutto, złotych *'] = pd.to_numeric(
+    avg_salary_df['Miesięczne wynagrodzenie brutto, złotych *'])
+avg_salary_df['siła nabywcza'] = round(
+    avg_salary_df['Miesięczne wynagrodzenie brutto, złotych *'] / avg_salary_df['cena benzyny']).astype(int)
+
+
+def draw_ppp_fuel_eu_bar():
+    avg_salary_df.sort_values('siła nabywcza', inplace=True, ascending=False)
+    fig, ax = plt.subplots(figsize=(32, 10), dpi=100)
+    colors = ['r' if _ == 'Polska' else 'c' for _ in avg_salary_df.index]
+    avg_salary_df['siła nabywcza'].plot(kind='bar', color=colors, width=0.9)
+    x = np.arange(len(avg_salary_df))
+    ax.tick_params(which='major', labelsize=20)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+    ax.set_xticks(x)
+
+    plt.tight_layout()
+    ax.set(xlabel=None)
+    fig.savefig('ppp_fuel_bar.png')
 
 
 def draw_country_petrol_bar():
