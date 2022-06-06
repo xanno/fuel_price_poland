@@ -62,6 +62,7 @@ def draw_ppp_fuel_eu_bar():
     ax.tick_params(which='major', labelsize=20)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
     ax.set_xticks(x)
+    plt.ylabel('Ile można zatankować PB95 w litrach\n za miesięczne wynagrodzenie brutto', fontsize=15)
 
     plt.tight_layout()
     ax.set(xlabel=None)
